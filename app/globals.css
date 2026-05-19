@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;500;600;700&family=Barlow:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --red-primary: #CC0000;
+  --red-dark: #990000;
+  --black-900: #0A0A0A;
+  --black-800: #111111;
+  --black-700: #1C1C1C;
+  --black-600: #242424;
+  --gray-accent: #9CA3AF;
+  --gray-muted: #6B7280;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--black-900);
+    color: #ffffff;
+    font-family: var(--font-barlow), 'Barlow', sans-serif;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: var(--red-primary);
+    color: white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--black-800);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--red-primary);
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply bg-red-primary text-white;
+    @apply font-display tracking-widest uppercase;
+    @apply px-8 py-3 text-sm;
+    @apply transition-all duration-200;
+    @apply hover:bg-red-dark hover:scale-[1.02] active:scale-[0.98];
+    @apply focus:outline-none focus:ring-2 focus:ring-red-primary focus:ring-offset-2 focus:ring-offset-black-900;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply border border-white/20 text-white;
+    @apply font-display tracking-widest uppercase;
+    @apply px-8 py-3 text-sm;
+    @apply transition-all duration-200;
+    @apply hover:border-white/60 hover:bg-white/5;
+    @apply focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-black-900;
+  }
+
+  .btn-whatsapp {
+    @apply inline-flex items-center justify-center gap-3;
+    @apply bg-[#25D366] text-white;
+    @apply font-display tracking-widest uppercase;
+    @apply px-8 py-3 text-sm;
+    @apply transition-all duration-200;
+    @apply hover:bg-[#1ebe5b] hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply bg-red-primary/20 text-red-primary border border-red-primary/30;
+    @apply font-condensed tracking-wider uppercase text-sm;
+    @apply px-4 py-2;
+    @apply transition-all duration-200;
+    @apply hover:bg-red-primary hover:text-white;
+  }
+
+  .section-title {
+    @apply font-display text-4xl md:text-5xl text-white uppercase tracking-wider;
+  }
+
+  .card-product {
+    @apply relative bg-black-800 overflow-hidden;
+    @apply border border-white/5;
+    @apply transition-all duration-300;
+    @apply hover:border-red-primary/30;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5;
+    @apply font-condensed text-xs uppercase tracking-wider;
+    @apply border;
+  }
+
+  .badge-red {
+    @apply badge bg-red-primary/20 text-red-primary border-red-primary/30;
+  }
+
+  .badge-category {
+    @apply badge bg-black-700 text-gray-accent border-white/10;
+  }
+
+  .input-field {
+    @apply w-full bg-black-700 border border-white/10 text-white;
+    @apply font-body text-sm px-4 py-3;
+    @apply placeholder:text-gray-muted;
+    @apply focus:outline-none focus:border-red-primary focus:ring-1 focus:ring-red-primary/30;
+    @apply transition-colors duration-200;
+  }
+
+  .input-error {
+    @apply border-red-500 focus:border-red-500 focus:ring-red-500/30;
+  }
+
+  .label-field {
+    @apply block font-condensed text-xs text-gray-accent uppercase tracking-wider mb-1.5;
+  }
+
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      #1C1C1C 25%,
+      #242424 50%,
+      #1C1C1C 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .admin-card {
+    @apply bg-black-800 border border-white/5 p-6;
+  }
+
+  .admin-table-row {
+    @apply border-b border-white/5 hover:bg-white/[0.02] transition-colors;
+  }
+}
+
+@layer utilities {
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
