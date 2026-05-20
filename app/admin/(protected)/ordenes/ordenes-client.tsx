@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { updateOrderStatus } from '../../actions'
 import { formatPrice, getCustomerWhatsAppUrl } from '@/lib/utils'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/types'
@@ -12,10 +13,25 @@ interface OrdenesClientProps {
 
 export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
   const allOrders = initialOrders
-  const [filterStatus, setFilterStatus] = useState<OrderStatus | undefined>()
+  const searchParams = useSearchParams()
+  const [filterStatus, setFilterStatus] = useState<OrderStatus | undefined>(() => {
+    const filter = searchParams.get('filter')
+    return filter ? (filter as OrderStatus) : undefined
+  })
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [orderDetail, setOrderDetail] = useState<Order | null>(null)
   const [isUpdating, setIsUpdating] = useState(false)
+
+  useEffect(() => {
+    const viewId = searchParams.get('view')
+    if (viewId) {
+      const order = allOrders.find((o) => o.id === viewId)
+      if (order) {
+        setSelectedOrderId(viewId)
+        setOrderDetail(order)
+      }
+    }
+  }, [searchParams, allOrders])
 
   // Filtrar localmente (sin re-fetch) ya que tenemos todos los datos
   const orders = filterStatus

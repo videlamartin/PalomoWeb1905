@@ -15,12 +15,15 @@ interface ProductDetailClientProps {
 }
 
 export function ProductDetailClient({ product }: ProductDetailClientProps) {
-  const [selectedSize, setSelectedSize] = useState<ProductSize | null>(null)
+  const sizes = product.product_sizes ?? []
+  const isOneSize = sizes.length === 1 && sizes[0].size === 'U'
+
+  const [selectedSize, setSelectedSize] = useState<ProductSize | null>(() => {
+    return isOneSize ? 'U' : null
+  })
   const [added, setAdded] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { addItem, openCart } = useCartStore()
-
-  const sizes = product.product_sizes ?? []
   const primaryImage = product.images[0] ?? `https://picsum.photos/seed/palomo${product.id}/800/1000`
 
   const handleAddToCart = () => {
@@ -103,7 +106,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
         )}
 
         {/* Size selector */}
-        {sizes.length > 0 && (
+        {!isOneSize && sizes.length > 0 && (
           <SizeSelector
             sizes={sizes}
             selectedSize={selectedSize}

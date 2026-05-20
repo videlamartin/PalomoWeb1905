@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { deleteProduct, upsertProduct } from '../../actions'
 import { formatPrice } from '@/lib/utils'
 import { CATEGORY_LABELS } from '@/types'
@@ -16,6 +17,18 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const editId = searchParams.get('edit')
+    if (editId) {
+      const productToEdit = products.find(p => p.id === editId)
+      if (productToEdit) {
+        setEditProduct(productToEdit)
+        setShowModal(true)
+      }
+    }
+  }, [searchParams, products])
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)

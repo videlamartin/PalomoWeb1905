@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/types'
@@ -24,7 +25,7 @@ async function getDashboardData(): Promise<{ stats: DashboardStats; recentOrders
         .eq('status', 'pendiente'),
       supabase
         .from('product_sizes')
-        .select('id, size, stock, products(name)')
+        .select('id, size, stock, product_id, products(name)')
         .lt('stock', 3)
         .order('stock', { ascending: true }),
       supabase
@@ -67,24 +68,28 @@ export default async function AdminDashboard() {
       value: stats.orders_today,
       icon: '📦',
       color: 'text-blue-400',
+      href: '/admin/ordenes',
     },
     {
       label: 'Facturado hoy',
       value: formatPrice(stats.revenue_today),
       icon: '💰',
       color: 'text-green-400',
+      href: '/admin/ordenes',
     },
     {
       label: 'Órdenes pendientes',
       value: stats.pending_orders,
       icon: '⏳',
       color: 'text-yellow-400',
+      href: '/admin/ordenes?filter=pendiente',
     },
     {
       label: 'Talles con stock bajo',
       value: stats.low_stock_count,
       icon: '⚠️',
       color: 'text-red-400',
+      href: '/admin/productos',
     },
   ]
 
@@ -100,13 +105,13 @@ export default async function AdminDashboard() {
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {METRICS.map((metric) => (
-          <div key={metric.label} className="admin-card">
+          <Link href={metric.href} key={metric.label} className="admin-card block hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
             <div className="flex items-start justify-between mb-3">
               <span className="text-2xl" aria-hidden="true">{metric.icon}</span>
             </div>
             <p className={`font-display text-3xl ${metric.color}`}>{metric.value}</p>
             <p className="font-condensed text-xs text-gray-muted uppercase tracking-wider mt-1">{metric.label}</p>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -127,7 +132,7 @@ export default async function AdminDashboard() {
             <p className="py-6 text-center font-condensed text-xs text-gray-muted uppercase">Sin órdenes aún</p>
           ) : (
             recentOrders.map((order) => (
-              <div key={order.id} className="border border-white/5 p-3 space-y-2">
+              <Link href={`/admin/ordenes?view=${order.id}`} key={order.id} className="border border-white/5 p-3 space-y-2 block hover:bg-white/5 transition-colors">
                 <div className="flex items-center justify-between">
                   <span className="font-condensed text-xs text-gray-accent">#{order.id.slice(0, 8).toUpperCase()}</span>
                   <span className="font-condensed text-xs text-gray-muted">
@@ -141,7 +146,7 @@ export default async function AdminDashboard() {
                 <span className={`badge border ${ORDER_STATUS_COLORS[order.status]}`}>
                   {ORDER_STATUS_LABELS[order.status]}
                 </span>
-              </div>
+              </Link>
             ))
           )}
         </div>
@@ -167,28 +172,38 @@ export default async function AdminDashboard() {
                 </tr>
               ) : (
                 recentOrders.map((order) => (
-                  <tr key={order.id} className="admin-table-row">
-                    <td className="py-3 pr-4">
-                      <span className="font-condensed text-xs text-gray-accent">
-                        #{order.id.slice(0, 8).toUpperCase()}
-                      </span>
+                  <tr key={order.id} className="admin-table-row group">
+                    <td className="py-0 pr-4">
+                      <Link href={`/admin/ordenes?view=${order.id}`} className="block py-3">
+                        <span className="font-condensed text-xs text-gray-accent">
+                          #{order.id.slice(0, 8).toUpperCase()}
+                        </span>
+                      </Link>
                     </td>
-                    <td className="py-3 pr-4">
-                      <p className="font-condensed text-sm text-white">{order.customer_name}</p>
-                      <p className="font-condensed text-xs text-gray-muted">{order.customer_phone}</p>
+                    <td className="py-0 pr-4">
+                      <Link href={`/admin/ordenes?view=${order.id}`} className="block py-3">
+                        <p className="font-condensed text-sm text-white">{order.customer_name}</p>
+                        <p className="font-condensed text-xs text-gray-muted">{order.customer_phone}</p>
+                      </Link>
                     </td>
-                    <td className="py-3 pr-4">
-                      <span className="font-display text-base text-white">{formatPrice(order.total)}</span>
+                    <td className="py-0 pr-4">
+                      <Link href={`/admin/ordenes?view=${order.id}`} className="block py-3">
+                        <span className="font-display text-base text-white">{formatPrice(order.total)}</span>
+                      </Link>
                     </td>
-                    <td className="py-3 pr-4">
-                      <span className={`badge border ${ORDER_STATUS_COLORS[order.status]}`}>
-                        {ORDER_STATUS_LABELS[order.status]}
-                      </span>
+                    <td className="py-0 pr-4">
+                      <Link href={`/admin/ordenes?view=${order.id}`} className="block py-3">
+                        <span className={`badge border ${ORDER_STATUS_COLORS[order.status]}`}>
+                          {ORDER_STATUS_LABELS[order.status]}
+                        </span>
+                      </Link>
                     </td>
-                    <td className="py-3">
-                      <span className="font-condensed text-xs text-gray-muted">
-                        {new Date(order.created_at).toLocaleDateString('es-AR')}
-                      </span>
+                    <td className="py-0">
+                      <Link href={`/admin/ordenes?view=${order.id}`} className="block py-3">
+                        <span className="font-condensed text-xs text-gray-muted">
+                          {new Date(order.created_at).toLocaleDateString('es-AR')}
+                        </span>
+                      </Link>
                     </td>
                   </tr>
                 ))
@@ -216,9 +231,13 @@ export default async function AdminDashboard() {
                   </p>
                   <p className="font-condensed text-xs text-red-400 mt-0.5">Talle: {item.size}</p>
                 </div>
-                <span className="font-display text-2xl text-red-primary bg-red-500/10 px-4 py-1 rounded">
+                <Link 
+                  href={`/admin/productos?edit=${item.product_id}`}
+                  className="font-display text-2xl text-red-primary bg-red-500/10 px-4 py-1 rounded hover:bg-red-500/20 transition-colors cursor-pointer"
+                  title="Editar stock del producto"
+                >
                   {item.stock}
-                </span>
+                </Link>
               </div>
             ))}
           </div>
