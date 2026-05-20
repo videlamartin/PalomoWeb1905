@@ -66,20 +66,20 @@ export default function AdminOrdenesPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-display text-4xl text-white uppercase tracking-wider">Órdenes</h1>
+      <div className="mb-6">
+        <h1 className="font-display text-3xl lg:text-4xl text-white uppercase tracking-wider">Órdenes</h1>
         <p className="font-condensed text-xs text-gray-muted uppercase tracking-wider mt-1">
           {orders.length} {filterStatus ? `${filterStatus}s` : 'órdenes en total'}
         </p>
       </div>
 
-      {/* Status filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      {/* Status filters — scrolleable en mobile */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 no-scrollbar">
         {statuses.map((s) => (
           <button
             key={s ?? 'all'}
             onClick={() => setFilterStatus(s)}
-            className={`font-condensed text-xs uppercase tracking-wider px-4 py-2 border transition-colors ${
+            className={`font-condensed text-xs uppercase tracking-wider px-4 py-2 border transition-colors flex-shrink-0 ${
               filterStatus === s
                 ? 'border-red-primary text-red-primary bg-red-primary/10'
                 : 'border-white/10 text-gray-muted hover:border-white/30 hover:text-white'
@@ -90,8 +90,69 @@ export default function AdminOrdenesPage() {
         ))}
       </div>
 
-      {/* Orders table */}
-      <div className="admin-card overflow-x-auto">
+      {/* ── MOBILE: Cards ── */}
+      <div className="lg:hidden space-y-3">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="admin-card space-y-3">
+              <div className="h-4 shimmer-bg w-2/3" />
+              <div className="h-4 shimmer-bg w-1/2" />
+              <div className="h-4 shimmer-bg w-1/3" />
+            </div>
+          ))
+        ) : orders.length === 0 ? (
+          <div className="admin-card py-10 text-center font-condensed text-xs text-gray-muted uppercase">
+            Sin órdenes
+          </div>
+        ) : (
+          orders.map((order) => (
+            <div key={order.id} className="admin-card space-y-3">
+              {/* Header: ID + fecha */}
+              <div className="flex items-center justify-between">
+                <span className="font-condensed text-xs text-gray-muted">
+                  #{order.id.slice(0, 8).toUpperCase()}
+                </span>
+                <span className="font-condensed text-xs text-gray-muted">
+                  {new Date(order.created_at).toLocaleDateString('es-AR')}
+                </span>
+              </div>
+              {/* Cliente + total */}
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-condensed text-sm text-white">{order.customer_name}</p>
+                  <p className="font-condensed text-xs text-gray-muted">{order.customer_phone}</p>
+                </div>
+                <span className="font-display text-lg text-white flex-shrink-0">{formatPrice(order.total)}</span>
+              </div>
+              {/* Estado + acciones */}
+              <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                <span className={`badge border ${ORDER_STATUS_COLORS[order.status]}`}>
+                  {ORDER_STATUS_LABELS[order.status]}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setSelectedOrderId(order.id)}
+                    className="font-condensed text-xs text-gray-accent hover:text-white uppercase tracking-wider px-3 py-1.5 border border-white/10 hover:border-white/30 transition-colors"
+                  >
+                    Ver
+                  </button>
+                  <a
+                    href={getWhatsAppUrl(`Hola ${order.customer_name}! Te contactamos por tu pedido #${order.id.slice(0, 8).toUpperCase()} de El Palomo 1950.`)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-condensed text-xs text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/10 uppercase tracking-wider px-3 py-1.5 transition-colors"
+                  >
+                    WA
+                  </a>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ── DESKTOP: Table ── */}
+      <div className="hidden lg:block admin-card overflow-x-auto">
         <table className="w-full" aria-label="Lista de órdenes">
           <thead>
             <tr className="border-b border-white/5">

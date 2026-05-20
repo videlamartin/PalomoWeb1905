@@ -84,8 +84,8 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-display text-4xl text-white uppercase tracking-wider">Dashboard</h1>
+      <div className="mb-6">
+        <h1 className="font-display text-3xl lg:text-4xl text-white uppercase tracking-wider">Dashboard</h1>
         <p className="font-condensed text-xs text-gray-muted uppercase tracking-wider mt-1">
           {new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         </p>
@@ -115,7 +115,33 @@ export default async function AdminDashboard() {
           </a>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile: cards */}
+        <div className="lg:hidden space-y-3">
+          {recentOrders.length === 0 ? (
+            <p className="py-6 text-center font-condensed text-xs text-gray-muted uppercase">Sin órdenes aún</p>
+          ) : (
+            recentOrders.map((order) => (
+              <div key={order.id} className="border border-white/5 p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-condensed text-xs text-gray-accent">#{order.id.slice(0, 8).toUpperCase()}</span>
+                  <span className="font-condensed text-xs text-gray-muted">
+                    {new Date(order.created_at).toLocaleDateString('es-AR')}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="font-condensed text-sm text-white">{order.customer_name}</span>
+                  <span className="font-display text-base text-white">{formatPrice(order.total)}</span>
+                </div>
+                <span className={`badge border ${ORDER_STATUS_COLORS[order.status]}`}>
+                  {ORDER_STATUS_LABELS[order.status]}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop: table */}
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full" aria-label="Últimas órdenes">
             <thead>
               <tr className="border-b border-white/5">

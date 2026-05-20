@@ -44,24 +44,96 @@ export default function AdminProductosPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="font-display text-4xl text-white uppercase tracking-wider">Productos</h1>
+          <h1 className="font-display text-3xl lg:text-4xl text-white uppercase tracking-wider">Productos</h1>
           <p className="font-condensed text-xs text-gray-muted uppercase tracking-wider mt-1">
             {products.length} productos en total
           </p>
         </div>
         <button
           onClick={() => { setEditProduct(null); setShowModal(true) }}
-          className="btn-primary px-6 py-3 text-xs"
+          className="btn-primary px-4 lg:px-6 py-2 lg:py-3 text-xs"
           id="new-product-btn"
         >
-          + Nuevo producto
+          + Nuevo
         </button>
       </div>
 
-      {/* Table */}
-      <div className="admin-card overflow-x-auto">
+      {/* ── MOBILE: Cards ── */}
+      <div className="lg:hidden space-y-3">
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="admin-card space-y-3">
+              <div className="h-4 shimmer-bg w-3/4" />
+              <div className="h-4 shimmer-bg w-1/2" />
+              <div className="h-4 shimmer-bg w-1/3" />
+            </div>
+          ))
+        ) : products.length === 0 ? (
+          <div className="admin-card py-10 text-center font-condensed text-xs text-gray-muted uppercase">
+            No hay productos. Creá el primero.
+          </div>
+        ) : (
+          products.map((product) => (
+            <div key={product.id} className="admin-card space-y-3">
+              {/* Nombre + categoría */}
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="font-condensed text-sm text-white uppercase tracking-wide">{product.name}</p>
+                  <span className="badge badge-category mt-1">{CATEGORY_LABELS[product.category]}</span>
+                </div>
+                {product.featured && (
+                  <span className="font-condensed text-xs text-red-primary flex-shrink-0">★ Destacado</span>
+                )}
+              </div>
+              {/* Precio + stock */}
+              <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                <span className="font-display text-lg text-white">{formatPrice(product.price)}</span>
+                <span className={`font-condensed text-sm ${totalStock(product) < 5 ? 'text-yellow-400' : 'text-green-400'}`}>
+                  {totalStock(product)} uds.
+                </span>
+              </div>
+              {/* Acciones */}
+              <div className="flex gap-2 pt-1">
+                <button
+                  onClick={() => { setEditProduct(product); setShowModal(true) }}
+                  className="flex-1 font-condensed text-xs text-gray-accent hover:text-white uppercase tracking-wider py-2 border border-white/10 hover:border-white/30 transition-colors"
+                >
+                  Editar
+                </button>
+                {deleteConfirm === product.id ? (
+                  <div className="flex gap-1 flex-1">
+                    <button
+                      onClick={() => deleteMutation.mutate(product.id)}
+                      className="btn-danger text-[10px] px-2 py-1 flex-1"
+                      disabled={deleteMutation.isPending}
+                    >
+                      Confirmar
+                    </button>
+                    <button
+                      onClick={() => setDeleteConfirm(null)}
+                      className="font-condensed text-[10px] text-gray-muted hover:text-white uppercase tracking-wider px-2 py-1 border border-white/10 flex-1"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setDeleteConfirm(product.id)}
+                    className="btn-danger text-xs px-3 py-2"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* ── DESKTOP: Table ── */}
+      <div className="hidden lg:block admin-card overflow-x-auto">
         <table className="w-full" aria-label="Lista de productos">
           <thead>
             <tr className="border-b border-white/5">

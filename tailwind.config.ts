@@ -58,6 +58,9 @@ const config: Config = {
       backdropBlur: {
         xs: '2px',
       },
+      spacing: {
+        '18': '4.5rem', // 72px — para pt-18 bajo el header mobile fijo
+      },
     },
   },
   plugins: [],

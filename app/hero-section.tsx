@@ -44,7 +44,7 @@ export function HeroSection() {
           >
             <div className="w-8 h-px bg-red-primary" />
             <span className="font-condensed text-xs text-red-primary tracking-[0.4em] uppercase">
-              Indumentaria Oficial · Club Atlético Independiente
+              Indumentaria · Club Atlético Independiente
             </span>
           </motion.div>
 
@@ -66,7 +66,7 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.35 }}
             className="font-body text-lg text-gray-accent mb-10 max-w-lg leading-relaxed"
           >
-            Camisetas, buzos, pantalones y accesorios oficiales. Marcas Puma y Kanji.
+            Camisetas, buzos, pantalones y accesorios del Club Atlético Independiente.
             Pago al recibir. Envíos a todo el país.
           </motion.p>
 
