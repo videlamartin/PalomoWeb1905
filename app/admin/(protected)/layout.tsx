@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { LogoutButton } from '@/components/admin/LogoutButton'
 
-export default async function AdminLayout({
+export default async function AdminProtectedLayout({
   children,
 }: {
   children: React.ReactNode
@@ -55,22 +56,7 @@ export default async function AdminLayout({
               {user.email}
             </p>
           </div>
-          <form action="/api/admin/logout" method="POST">
-            <button
-              type="button"
-              onClick={async () => {
-                const supabase = (await import('@/lib/supabase/client')).createClient()
-                await supabase.auth.signOut()
-                window.location.href = '/admin/login'
-              }}
-              className="w-full flex items-center gap-3 px-4 py-3 font-condensed text-xs text-gray-muted hover:text-red-primary uppercase tracking-wider transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              Cerrar sesión
-            </button>
-          </form>
+          <LogoutButton />
         </div>
       </aside>
 

@@ -2,6 +2,13 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // ✅ Si ya estás en login, no hacer nada
+  if (pathname === '/admin/login') {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -23,36 +30,18 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // ✅ Capturá también el error
   const {
     data: { user },
-    error,
   } = await supabase.auth.getUser()
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginRoute = request.nextUrl.pathname === '/admin/login'
-
-  // ✅ Si hay error en Supabase, dejá pasar a /login pero no redirigir en loop
-  if (error) {
-    console.error('[Middleware] Supabase getUser error:', error.message)
-    if (isLoginRoute) return supabaseResponse
+  // Si no hay usuario y está intentando acceder a /admin/* → redirigir a login
+  if (!user) {
     const url = request.nextUrl.clone()
     url.pathname = '/admin/login'
     return NextResponse.redirect(url)
   }
 
-  if (isAdminRoute && !isLoginRoute && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/admin/login'
-    return NextResponse.redirect(url)
-  }
-
-  if (isLoginRoute && user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/admin/dashboard'
-    return NextResponse.redirect(url)
-  }
-
+  // Si hay usuario y está en una ruta admin → dejar pasar
   return supabaseResponse
 }
 
