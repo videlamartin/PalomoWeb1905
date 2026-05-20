@@ -13,16 +13,17 @@ export const useCartStore = create<CartState>()(
           const existing = state.items.find(
             (item) => item.product_id === newItem.product_id && item.size === newItem.size
           )
+          const limit = newItem.stock ?? 10
           if (existing) {
             return {
               items: state.items.map((item) =>
                 item.product_id === newItem.product_id && item.size === newItem.size
-                  ? { ...item, quantity: Math.min(item.quantity + newItem.quantity, 10) }
+                  ? { ...item, quantity: Math.min(item.quantity + newItem.quantity, limit) }
                   : item
               ),
             }
           }
-          return { items: [...state.items, newItem] }
+          return { items: [...state.items, { ...newItem, quantity: Math.min(newItem.quantity, limit) }] }
         })
       },
 
@@ -39,13 +40,19 @@ export const useCartStore = create<CartState>()(
           get().removeItem(product_id, size)
           return
         }
-        set((state) => ({
-          items: state.items.map((item) =>
-            item.product_id === product_id && item.size === size
-              ? { ...item, quantity: Math.min(quantity, 10) }
-              : item
-          ),
-        }))
+        set((state) => {
+          const matched = state.items.find(
+            (item) => item.product_id === product_id && item.size === size
+          )
+          const limit = matched?.stock ?? 10
+          return {
+            items: state.items.map((item) =>
+              item.product_id === product_id && item.size === size
+                ? { ...item, quantity: Math.min(quantity, limit) }
+                : item
+            ),
+          }
+        })
       },
 
       clearCart: () => set({ items: [] }),

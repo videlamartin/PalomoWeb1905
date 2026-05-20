@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { updateOrderStatus } from '../../actions'
+import { updateOrderStatus, deleteOrder } from '../../actions'
 import { formatPrice, getCustomerWhatsAppUrl } from '@/lib/utils'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/types'
 import type { Order, OrderStatus, OrderItem } from '@/types'
@@ -55,6 +55,20 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
     } catch (err) {
       console.error(err)
       alert('Error al actualizar el estado')
+    } finally {
+      setIsUpdating(false)
+    }
+  }
+
+  const handleDeleteOrder = async (orderId: string) => {
+    setIsUpdating(true)
+    try {
+      await deleteOrder(orderId)
+      setSelectedOrderId(null)
+      setOrderDetail(null)
+    } catch (err) {
+      console.error(err)
+      alert('Error al eliminar la orden')
     } finally {
       setIsUpdating(false)
     }
@@ -220,6 +234,7 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
           onClose={() => { setSelectedOrderId(null); setOrderDetail(null) }}
           onStatusChange={(status) => updateStatus(selectedOrderId, status)}
           isUpdating={isUpdating}
+          onDelete={() => handleDeleteOrder(selectedOrderId)}
         />
       )}
     </div>
@@ -232,10 +247,12 @@ interface OrderDetailModalProps {
   onClose: () => void
   onStatusChange: (status: OrderStatus) => void
   isUpdating: boolean
+  onDelete: () => Promise<void>
 }
 
-function OrderDetailModal({ order, isLoading, onClose, onStatusChange, isUpdating }: OrderDetailModalProps) {
+function OrderDetailModal({ order, isLoading, onClose, onStatusChange, isUpdating, onDelete }: OrderDetailModalProps) {
   const STATUSES: OrderStatus[] = ['pendiente', 'preparando', 'enviado', 'entregado', 'cancelado']
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -324,15 +341,44 @@ function OrderDetailModal({ order, isLoading, onClose, onStatusChange, isUpdatin
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2 border-t border-white/5">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-white/5">
               <a
                 href={getCustomerWhatsAppUrl(order.customer_phone, order.id.slice(0, 8).toUpperCase())}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-whatsapp flex-1 py-3 text-xs"
+                className="btn-whatsapp py-3 text-xs text-center flex-1"
               >
                 Abrir WhatsApp
               </a>
+
+              {confirmDelete ? (
+                <div className="flex gap-2 items-center flex-1 justify-end bg-red-950/20 border border-red-500/20 p-1.5">
+                  <span className="font-condensed text-[10px] text-red-400 uppercase tracking-wider pl-2">¿Seguro?</span>
+                  <button
+                    onClick={onDelete}
+                    disabled={isUpdating}
+                    className="bg-red-600 hover:bg-red-700 text-white font-condensed text-xs uppercase tracking-wider px-3.5 py-2.5 transition-colors"
+                  >
+                    Sí
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    disabled={isUpdating}
+                    className="bg-black-700 hover:bg-black-600 border border-white/10 text-white font-condensed text-xs uppercase tracking-wider px-3 py-2.5 transition-colors"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmDelete(true)}
+                  disabled={isUpdating}
+                  className="btn-secondary text-red-500 border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 py-3 text-xs flex-1 uppercase tracking-wider"
+                >
+                  Eliminar Orden
+                </button>
+              )}
+
               <button onClick={onClose} className="btn-secondary px-6 py-3 text-xs">
                 Cerrar
               </button>

@@ -59,6 +59,35 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
   revalidatePath('/admin/dashboard')
 }
 
+export async function deleteOrder(orderId: string) {
+  const supabase = createClient()
+  
+  // Primero eliminamos los order_items por seguridad (en caso de que no haya CASCADE delete)
+  const { error: itemsError } = await supabase
+    .from('order_items')
+    .delete()
+    .eq('order_id', orderId)
+
+  if (itemsError) {
+    console.error('Error deleting order items:', itemsError)
+    throw new Error('No se pudieron eliminar los ítems de la orden')
+  }
+
+  // Ahora eliminamos la orden
+  const { error: orderError } = await supabase
+    .from('orders')
+    .delete()
+    .eq('id', orderId)
+
+  if (orderError) {
+    console.error('Error deleting order:', orderError)
+    throw new Error('No se pudo eliminar la orden')
+  }
+
+  revalidatePath('/admin/ordenes')
+  revalidatePath('/admin/dashboard')
+}
+
 // --- PRODUCTOS ---
 
 export async function deleteProduct(productId: string) {

@@ -28,6 +28,7 @@ export interface CartItem {
   size: ProductSize
   quantity: number
   unit_price: number
+  stock?: number
 }
 
 export interface CartState {

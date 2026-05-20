@@ -38,6 +38,17 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       return
     }
 
+    const { items } = useCartStore.getState()
+    const existingItem = items.find(
+      (item) => item.product_id === product.id && item.size === selectedSize
+    )
+    const currentQtyInCart = existingItem ? existingItem.quantity : 0
+
+    if (currentQtyInCart + 1 > sizeData.stock) {
+      setError(`No podés agregar más de las unidades disponibles en stock (límite: ${sizeData.stock})`)
+      return
+    }
+
     addItem({
       product_id: product.id,
       product_name: product.name,
@@ -45,6 +56,7 @@ export function ProductDetailClient({ product }: ProductDetailClientProps) {
       size: selectedSize,
       quantity: 1,
       unit_price: product.price,
+      stock: sizeData.stock,
     })
 
     setAdded(true)

@@ -125,12 +125,14 @@ export function CartDrawer() {
                           </button>
                           <span className="font-condensed text-sm w-6 text-center">{item.quantity}</span>
                           <button
-                            onClick={() => updateQuantity(item.product_id, item.size as ProductSize, item.quantity + 1)}
-                            className="w-6 h-6 flex items-center justify-center border border-white/20 text-white hover:border-red-primary hover:text-red-primary transition-colors text-sm"
-                            aria-label="Aumentar cantidad"
-                          >
-                            +
-                          </button>
+                             onClick={() => updateQuantity(item.product_id, item.size as ProductSize, item.quantity + 1)}
+                             disabled={item.stock !== undefined && item.quantity >= item.stock}
+                             className="w-6 h-6 flex items-center justify-center border border-white/20 text-white hover:border-red-primary hover:text-red-primary disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:text-white disabled:hover:border-white/20 transition-colors text-sm"
+                             aria-label="Aumentar cantidad"
+                             title={item.stock !== undefined && item.quantity >= item.stock ? "Límite de stock alcanzado" : undefined}
+                           >
+                             +
+                           </button>
                           <button
                             onClick={() => removeItem(item.product_id, item.size as ProductSize)}
                             className="ml-auto text-gray-muted hover:text-red-primary transition-colors"

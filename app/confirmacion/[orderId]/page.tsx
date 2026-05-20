@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { formatPrice, getOrderWhatsAppUrl } from '@/lib/utils'
 import type { Order } from '@/types'
 import type { Metadata } from 'next'
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 async function getOrder(orderId: string): Promise<Order | null> {
   try {
-    const supabase = createClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('orders')
       .select('*, order_items(*)')
