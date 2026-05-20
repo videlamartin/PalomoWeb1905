@@ -228,6 +228,23 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
     images: product?.images?.join('\n') ?? '',
   })
 
+  const [hasSizes, setHasSizes] = useState<boolean>(() => {
+    if (product) {
+      return !product.product_sizes?.some(ps => ps.size === 'U')
+    }
+    return true
+  })
+
+  const [sizes, setSizes] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0, U: 0 }
+    if (product?.product_sizes) {
+      product.product_sizes.forEach(ps => {
+        initial[ps.size] = ps.stock
+      })
+    }
+    return initial
+  })
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -242,6 +259,9 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
         category: form.category,
         featured: form.featured,
         images: form.images.split('\n').map((l) => l.trim()).filter(Boolean),
+        sizes: hasSizes 
+          ? Object.entries(sizes).filter(([size]) => size !== 'U').map(([size, stock]) => ({ size, stock }))
+          : [{ size: 'U', stock: sizes['U'] || 0 }]
       }
 
       await upsertProduct(data)
@@ -306,7 +326,13 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
               <select
                 className="input-field"
                 value={form.category}
-                onChange={(e) => setForm({ ...form, category: e.target.value as ProductCategory })}
+                onChange={(e) => {
+                  const newCat = e.target.value as ProductCategory;
+                  setForm({ ...form, category: newCat });
+                  if (!product) {
+                    setHasSizes(newCat !== 'accesorios');
+                  }
+                }}
               >
                 {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
@@ -324,6 +350,55 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
               onChange={(e) => setForm({ ...form, images: e.target.value })}
               placeholder="https://picsum.photos/seed/producto1/800/1000"
             />
+          </div>
+
+          <div className="flex items-center gap-3 mb-4 mt-2">
+            <input
+              type="checkbox"
+              id="hasSizes"
+              className="w-4 h-4 accent-red-500 bg-transparent border border-white/20"
+              checked={hasSizes}
+              onChange={(e) => setHasSizes(e.target.checked)}
+            />
+            <label htmlFor="hasSizes" className="font-condensed text-sm text-gray-accent uppercase tracking-widest cursor-pointer select-none">
+              El producto tiene varios talles (XS a XXL)
+            </label>
+          </div>
+
+          <div>
+            {hasSizes ? (
+              <>
+                <label className="label-field mb-2 block">Stock por talle</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((size) => (
+                    <div key={size} className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2">
+                      <span className="font-display text-sm text-white w-8">{size}</span>
+                      <input
+                        type="number"
+                        min="0"
+                        className="w-full bg-transparent border-b border-white/20 text-white font-condensed text-center focus:outline-none focus:border-red-primary"
+                        value={sizes[size]}
+                        onChange={(e) => setSizes({ ...sizes, [size]: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <label className="label-field mb-2 block">Stock Disponible (Talle Único)</label>
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-2 w-full sm:w-1/2">
+                  <span className="font-display text-sm text-white w-8">U</span>
+                  <input
+                    type="number"
+                    min="0"
+                    className="w-full bg-transparent border-b border-white/20 text-white font-condensed text-center focus:outline-none focus:border-red-primary"
+                    value={sizes['U']}
+                    onChange={(e) => setSizes({ ...sizes, U: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex items-center gap-3">

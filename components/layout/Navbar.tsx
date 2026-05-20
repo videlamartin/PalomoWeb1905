@@ -12,6 +12,7 @@ const NAV_LINKS = [
   { href: '/catalogo?categoria=camisetas', label: 'Camisetas' },
   { href: '/catalogo?categoria=buzos', label: 'Buzos' },
   { href: '/catalogo?categoria=accesorios', label: 'Accesorios' },
+  { href: '/seguimiento', label: 'Mis Pedidos' },
 ]
 
 export function Navbar() {

@@ -18,8 +18,7 @@ export function Footer() {
               </span>
             </div>
             <p className="font-body text-sm text-gray-muted leading-relaxed max-w-xs">
-              Indumentaria oficial del Club Atlético Independiente. Marcas Puma y Kanji. 
-              Pago al recibir. Envíos a todo el país.
+              Indumentaria del Club Atlético Independiente. La mejor calidad a los mejores precios. Pago al recibir. Envíos a todo el país.
             </p>
           </div>
 

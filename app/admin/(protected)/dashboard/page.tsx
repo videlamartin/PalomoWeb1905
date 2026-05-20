@@ -6,7 +6,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard Admin' }
 
-async function getDashboardData(): Promise<{ stats: DashboardStats; recentOrders: Order[] }> {
+async function getDashboardData(): Promise<{ stats: DashboardStats; recentOrders: Order[]; lowStockItems: any[] }> {
   try {
     const supabase = createClient()
     const today = new Date()
@@ -16,15 +16,17 @@ async function getDashboardData(): Promise<{ stats: DashboardStats; recentOrders
       supabase
         .from('orders')
         .select('total')
-        .gte('created_at', today.toISOString()),
+        .gte('created_at', today.toISOString())
+        .neq('status', 'cancelado'),
       supabase
         .from('orders')
         .select('id', { count: 'exact' })
         .eq('status', 'pendiente'),
       supabase
         .from('product_sizes')
-        .select('id', { count: 'exact' })
-        .lt('stock', 3),
+        .select('id, size, stock, products(name)')
+        .lt('stock', 3)
+        .order('stock', { ascending: true }),
       supabase
         .from('orders')
         .select('*')
@@ -35,25 +37,29 @@ async function getDashboardData(): Promise<{ stats: DashboardStats; recentOrders
     const orders = ordersToday.data ?? []
     const revenueToday = orders.reduce((sum, o) => sum + (o.total ?? 0), 0)
 
+    const lowStockItems = lowStockProducts.data ?? []
+
     return {
       stats: {
         orders_today: orders.length,
         revenue_today: revenueToday,
-        low_stock_count: lowStockProducts.count ?? 0,
+        low_stock_count: lowStockItems.length,
         pending_orders: pendingOrders.count ?? 0,
       },
       recentOrders: (recentOrders.data as Order[]) ?? [],
+      lowStockItems,
     }
   } catch {
     return {
       stats: { orders_today: 0, revenue_today: 0, low_stock_count: 0, pending_orders: 0 },
       recentOrders: [],
+      lowStockItems: [],
     }
   }
 }
 
 export default async function AdminDashboard() {
-  const { stats, recentOrders } = await getDashboardData()
+  const { stats, recentOrders, lowStockItems } = await getDashboardData()
 
   const METRICS = [
     {
@@ -191,6 +197,33 @@ export default async function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      {/* Low Stock Warning Section */}
+      {lowStockItems.length > 0 && (
+        <div className="admin-card mt-6 border-red-500/30 bg-red-500/5">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-2xl" aria-hidden="true">⚠️</span>
+            <h2 className="font-condensed text-sm text-red-primary uppercase tracking-[0.3em]">
+              Alertas de Stock Bajo
+            </h2>
+          </div>
+          <div className="space-y-3">
+            {lowStockItems.map((item) => (
+              <div key={item.id} className="flex items-center justify-between border-b border-red-500/10 pb-3 last:border-0 last:pb-0">
+                <div>
+                  <p className="font-condensed text-sm text-white uppercase tracking-wide">
+                    {item.products?.name || 'Producto Desconocido'}
+                  </p>
+                  <p className="font-condensed text-xs text-red-400 mt-0.5">Talle: {item.size}</p>
+                </div>
+                <span className="font-display text-2xl text-red-primary bg-red-500/10 px-4 py-1 rounded">
+                  {item.stock}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

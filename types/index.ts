@@ -1,5 +1,5 @@
 export type ProductCategory = 'camisetas' | 'buzos' | 'pantalones' | 'accesorios'
-export type ProductSize = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL'
+export type ProductSize = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'XXL' | 'U'
 export type OrderStatus = 'pendiente' | 'preparando' | 'enviado' | 'entregado' | 'cancelado'
 
 export interface ProductSizeStock {
