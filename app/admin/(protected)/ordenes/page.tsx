@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createClient } from '@/lib/supabase/client'
-import { formatPrice, getWhatsAppUrl } from '@/lib/utils'
+import { formatPrice, getCustomerWhatsAppUrl } from '@/lib/utils'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/types'
 import type { Order, OrderStatus, OrderItem } from '@/types'
 
@@ -137,7 +137,7 @@ export default function AdminOrdenesPage() {
                     Ver
                   </button>
                   <a
-                    href={getWhatsAppUrl(`Hola ${order.customer_name}! Te contactamos por tu pedido #${order.id.slice(0, 8).toUpperCase()} de El Palomo 1950.`)}
+                    href={getCustomerWhatsAppUrl(order.customer_phone, order.id.slice(0, 8).toUpperCase())}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-condensed text-xs text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/10 uppercase tracking-wider px-3 py-1.5 transition-colors"
@@ -214,7 +214,7 @@ export default function AdminOrdenesPage() {
                         Ver
                       </button>
                       <a
-                        href={getWhatsAppUrl(`Hola ${order.customer_name}! Te contactamos por tu pedido #${order.id.slice(0, 8).toUpperCase()} de El Palomo 1950.`)}
+                        href={getCustomerWhatsAppUrl(order.customer_phone, order.id.slice(0, 8).toUpperCase())}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="font-condensed text-xs text-[#25D366] border border-[#25D366]/30 hover:bg-[#25D366]/10 uppercase tracking-wider px-3 py-1.5 transition-colors"
@@ -333,7 +333,7 @@ function OrderDetailModal({ order, onClose, onStatusChange, isUpdating }: OrderD
           {/* Actions */}
           <div className="flex gap-3 pt-2 border-t border-white/5">
             <a
-              href={getWhatsAppUrl(`Hola ${order.customer_name}! Te contactamos por tu pedido #${order.id.slice(0, 8).toUpperCase()} de El Palomo 1950.`)}
+              href={getCustomerWhatsAppUrl(order.customer_phone, order.id.slice(0, 8).toUpperCase())}
               target="_blank"
               rel="noopener noreferrer"
               className="btn-whatsapp flex-1 py-3 text-xs"

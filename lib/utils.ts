@@ -32,6 +32,22 @@ export function getOrderWhatsAppUrl(orderNumber: string, customerName: string): 
   return getWhatsAppUrl(message)
 }
 
+/**
+ * Abre WhatsApp directo al número del cliente (panel admin).
+ * Limpia el teléfono dejando solo dígitos y agrega el código Argentina (54) si falta.
+ */
+export function getCustomerWhatsAppUrl(customerPhone: string, orderShortId: string): string {
+  // Limpiar: solo dígitos
+  const digits = customerPhone.replace(/\D/g, '')
+  // Si ya empieza con 54 lo usamos tal cual, sino lo agregamos
+  const phone = digits.startsWith('54') ? digits : `54${digits}`
+  const message = encodeURIComponent(
+    `Hola! Te contactamos de El Palomo 1950 por tu pedido #${orderShortId}. ¿Cómo estás?`
+  )
+  return `https://wa.me/${phone}?text=${message}`
+}
+
+
 export function truncate(str: string, length: number): string {
   return str.length > length ? str.slice(0, length) + '...' : str
 }
