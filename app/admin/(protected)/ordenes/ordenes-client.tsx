@@ -15,7 +15,6 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
   const [filterStatus, setFilterStatus] = useState<OrderStatus | undefined>()
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [orderDetail, setOrderDetail] = useState<Order | null>(null)
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
 
   // Filtrar localmente (sin re-fetch) ya que tenemos todos los datos
@@ -23,20 +22,11 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
     ? allOrders.filter((o) => o.status === filterStatus)
     : allOrders
 
-  const openDetail = async (id: string) => {
+  // Abrir detalle: buscar en el array local (ya tiene order_items cargados desde el server)
+  const openDetail = (id: string) => {
+    const order = allOrders.find((o) => o.id === id) ?? null
     setSelectedOrderId(id)
-    setIsLoadingDetail(true)
-    try {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('orders')
-        .select('*, order_items(*)')
-        .eq('id', id)
-        .single()
-      setOrderDetail(data as Order)
-    } finally {
-      setIsLoadingDetail(false)
-    }
+    setOrderDetail(order)
   }
 
   const updateStatus = async (orderId: string, status: OrderStatus) => {
@@ -207,7 +197,7 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
       {selectedOrderId && (
         <OrderDetailModal
           order={orderDetail}
-          isLoading={isLoadingDetail}
+          isLoading={false}
           onClose={() => { setSelectedOrderId(null); setOrderDetail(null) }}
           onStatusChange={(status) => updateStatus(selectedOrderId, status)}
           isUpdating={isUpdating}
