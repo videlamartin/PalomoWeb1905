@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { updateOrderStatus, deleteOrder } from '../../actions'
 import { formatPrice, getCustomerWhatsAppUrl } from '@/lib/utils'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/types'
@@ -14,6 +14,8 @@ interface OrdenesClientProps {
 export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
   const allOrders = initialOrders
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
   const [filterStatus, setFilterStatus] = useState<OrderStatus | undefined>(() => {
     const filter = searchParams.get('filter')
     return filter ? (filter as OrderStatus) : undefined
@@ -43,6 +45,17 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
     const order = allOrders.find((o) => o.id === id) ?? null
     setSelectedOrderId(id)
     setOrderDetail(order)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedOrderId(null)
+    setOrderDetail(null)
+    const params = new URLSearchParams(searchParams.toString())
+    if (params.has('view')) {
+      params.delete('view')
+      const query = params.toString()
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+    }
   }
 
   const updateStatus = async (orderId: string, status: OrderStatus) => {
@@ -231,7 +244,7 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
         <OrderDetailModal
           order={orderDetail}
           isLoading={false}
-          onClose={() => { setSelectedOrderId(null); setOrderDetail(null) }}
+          onClose={handleCloseModal}
           onStatusChange={(status) => updateStatus(selectedOrderId, status)}
           isUpdating={isUpdating}
           onDelete={() => handleDeleteOrder(selectedOrderId)}
@@ -295,6 +308,16 @@ function OrderDetailModal({ order, isLoading, onClose, onStatusChange, isUpdatin
                 </p>
               </div>
             </div>
+
+            {/* Notes */}
+            {order.notes && (
+              <div>
+                <h3 className="font-condensed text-xs text-red-primary uppercase tracking-[0.3em] mb-2">Nota del cliente</h3>
+                <div className="bg-white/5 border border-white/10 p-3">
+                  <p className="font-condensed text-xs text-gray-accent whitespace-pre-wrap italic">"{order.notes}"</p>
+                </div>
+              </div>
+            )}
 
             {/* Items */}
             <div>

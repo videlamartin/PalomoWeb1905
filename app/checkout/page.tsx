@@ -236,9 +236,9 @@ export default function CheckoutPage() {
                   <div className="w-2.5 h-2.5 rounded-full bg-red-primary" />
                 </div>
                 <div>
-                  <p className="font-condensed text-sm text-white uppercase tracking-wider">Pago al recibir</p>
+                  <p className="font-condensed text-sm text-white uppercase tracking-wider">Pago al recibir / Transferencia</p>
                   <p className="font-body text-xs text-gray-muted mt-0.5">
-                    Abonás en efectivo cuando el producto llegue a tu domicilio. Sin tarjetas, sin adelantos.
+                    Abonás en efectivo o por transferencia bancaria. Coordinamos todos los detalles de pago contigo por WhatsApp antes del envío.
                   </p>
                 </div>
               </div>

@@ -122,7 +122,7 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
           <p className="font-body text-sm text-gray-accent leading-relaxed">
             Nos comunicaremos con vos por WhatsApp al número{' '}
             <strong className="text-white">{order.customer_phone}</strong> para coordinar la entrega.
-            El pago se realiza en efectivo cuando recibís el producto.
+            Podes abonar en efectivo al recibir el producto o mediante transferencia bancaria (coordinamos los datos de la transferencia por WhatsApp).
           </p>
         </div>
 

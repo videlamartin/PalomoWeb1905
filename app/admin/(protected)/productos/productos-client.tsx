@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter, usePathname } from 'next/navigation'
 import { deleteProduct, upsertProduct } from '../../actions'
 import { formatPrice } from '@/lib/utils'
 import { CATEGORY_LABELS } from '@/types'
@@ -18,6 +18,8 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     const editId = searchParams.get('edit')
@@ -29,6 +31,17 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
       }
     }
   }, [searchParams, products])
+
+  const handleCloseModal = () => {
+    setShowModal(false)
+    setEditProduct(null)
+    const params = new URLSearchParams(searchParams.toString())
+    if (params.has('edit')) {
+      params.delete('edit')
+      const query = params.toString()
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+    }
+  }
 
   const handleDelete = async (id: string) => {
     setIsDeleting(true)
@@ -214,8 +227,8 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
       {showModal && (
         <ProductModal
           product={editProduct}
-          onClose={() => setShowModal(false)}
-          onSuccess={() => setShowModal(false)}
+          onClose={handleCloseModal}
+          onSuccess={handleCloseModal}
         />
       )}
     </div>
