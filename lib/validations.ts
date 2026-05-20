@@ -42,7 +42,7 @@ export const orderApiSchema = z.object({
   notes: z.string().optional(),
   items: z.array(z.object({
     product_id: z.string().uuid(),
-    size: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL']),
+    size: z.enum(['XS', 'S', 'M', 'L', 'XL', 'XXL', 'U']),
     quantity: z.number().int().positive().max(10),
     unit_price: z.number().positive(),
     product_name: z.string(),

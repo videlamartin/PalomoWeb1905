@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatPrice } from '@/lib/utils'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/types'
+import { LowStockAlerts } from '@/components/admin/LowStockAlerts'
 import type { Order, DashboardStats } from '@/types'
 import type { Metadata } from 'next'
 
@@ -89,7 +90,7 @@ export default async function AdminDashboard() {
       value: stats.low_stock_count,
       icon: '⚠️',
       color: 'text-red-400',
-      href: '/admin/productos',
+      href: '#low-stock',
     },
   ]
 
@@ -104,15 +105,24 @@ export default async function AdminDashboard() {
 
       {/* Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        {METRICS.map((metric) => (
-          <Link href={metric.href} key={metric.label} className="admin-card block hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
-            <div className="flex items-start justify-between mb-3">
-              <span className="text-2xl" aria-hidden="true">{metric.icon}</span>
-            </div>
-            <p className={`font-display text-3xl ${metric.color}`}>{metric.value}</p>
-            <p className="font-condensed text-xs text-gray-muted uppercase tracking-wider mt-1">{metric.label}</p>
-          </Link>
-        ))}
+        {METRICS.map((metric) => {
+          const isAnchor = metric.href.startsWith('#')
+          const className = "admin-card block hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
+          const content = (
+            <>
+              <div className="flex items-start justify-between mb-3">
+                <span className="text-2xl" aria-hidden="true">{metric.icon}</span>
+              </div>
+              <p className={`font-display text-3xl ${metric.color}`}>{metric.value}</p>
+              <p className="font-condensed text-xs text-gray-muted uppercase tracking-wider mt-1">{metric.label}</p>
+            </>
+          )
+          return isAnchor ? (
+            <a key={metric.label} href={metric.href} className={className}>{content}</a>
+          ) : (
+            <Link key={metric.label} href={metric.href} className={className}>{content}</Link>
+          )
+        })}
       </div>
 
       {/* Recent Orders */}
@@ -215,33 +225,7 @@ export default async function AdminDashboard() {
 
       {/* Low Stock Warning Section */}
       {lowStockItems.length > 0 && (
-        <div className="admin-card mt-6 border-red-500/30 bg-red-500/5">
-          <div className="flex items-center gap-3 mb-6">
-            <span className="text-2xl" aria-hidden="true">⚠️</span>
-            <h2 className="font-condensed text-sm text-red-primary uppercase tracking-[0.3em]">
-              Alertas de Stock Bajo
-            </h2>
-          </div>
-          <div className="space-y-3">
-            {lowStockItems.map((item) => (
-              <div key={item.id} className="flex items-center justify-between border-b border-red-500/10 pb-3 last:border-0 last:pb-0">
-                <div>
-                  <p className="font-condensed text-sm text-white uppercase tracking-wide">
-                    {item.products?.name || 'Producto Desconocido'}
-                  </p>
-                  <p className="font-condensed text-xs text-red-400 mt-0.5">Talle: {item.size}</p>
-                </div>
-                <Link 
-                  href={`/admin/productos?edit=${item.product_id}`}
-                  className="font-display text-2xl text-red-primary bg-red-500/10 px-4 py-1 rounded hover:bg-red-500/20 transition-colors cursor-pointer"
-                  title="Editar stock del producto"
-                >
-                  {item.stock}
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
+        <LowStockAlerts items={lowStockItems} />
       )}
     </div>
   )

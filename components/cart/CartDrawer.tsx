@@ -63,12 +63,22 @@ export function CartDrawer() {
                   <p className="font-condensed text-gray-muted uppercase tracking-wider text-sm">
                     El carrito está vacío
                   </p>
-                  <button
-                    onClick={closeCart}
-                    className="mt-6 btn-secondary px-6 py-2 text-xs"
-                  >
-                    Ver catálogo
-                  </button>
+                  <div className="flex flex-col gap-3 w-full max-w-[200px] mx-auto mt-6">
+                    <Link
+                      href="/catalogo"
+                      onClick={closeCart}
+                      className="btn-secondary w-full py-2 text-xs text-center"
+                    >
+                      Ver catálogo
+                    </Link>
+                    <Link
+                      href="/seguimiento"
+                      onClick={closeCart}
+                      className="btn-secondary w-full py-2 text-xs text-center"
+                    >
+                      Mis pedidos
+                    </Link>
+                  </div>
                 </div>
               ) : (
                 <AnimatePresence initial={false}>
@@ -98,7 +108,7 @@ export function CartDrawer() {
                           {item.product_name}
                         </p>
                         <p className="font-condensed text-xs text-gray-muted uppercase tracking-widest mt-1">
-                          Talle: {item.size}
+                          {item.size === 'U' ? 'Talle Único' : `Talle: ${item.size}`}
                         </p>
                         <p className="font-display text-lg text-red-primary mt-1">
                           {formatPrice(item.unit_price * item.quantity)}

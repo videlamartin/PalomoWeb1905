@@ -37,9 +37,14 @@ async function getProducts(
 ): Promise<{ products: Product[]; total: number }> {
   try {
     const supabase = createClient()
+    let selectQuery = '*, product_sizes(*)'
+    if (size) {
+      selectQuery = '*, product_sizes!inner(*)'
+    }
+
     let query = supabase
       .from('products')
-      .select('*, product_sizes(*)', { count: 'exact' })
+      .select(selectQuery, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
 
@@ -48,12 +53,12 @@ async function getProducts(
     }
 
     if (size) {
-      query = query.contains('product_sizes', [{ size, stock: 1 }])
+      query = query.eq('product_sizes.size', size).gt('product_sizes.stock', 0)
     }
 
     const { data, count, error } = await query
     if (error) return { products: [], total: 0 }
-    return { products: (data as Product[]) ?? [], total: count ?? 0 }
+    return { products: (data as unknown as Product[]) ?? [], total: count ?? 0 }
   } catch {
     return { products: [], total: 0 }
   }

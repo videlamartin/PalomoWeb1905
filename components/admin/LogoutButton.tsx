@@ -1,15 +1,14 @@
 'use client'
 
+import { logout } from '@/app/admin/actions'
+
 interface LogoutButtonProps {
   compact?: boolean
 }
 
 export function LogoutButton({ compact = false }: LogoutButtonProps) {
   const handleLogout = async () => {
-    // Usamos el API route server-side para limpiar la sesión correctamente
-    // en todos los dispositivos (mobile y desktop)
-    await fetch('/api/auth/logout', { method: 'POST' })
-    window.location.href = '/admin/login'
+    await logout()
   }
 
   if (compact) {

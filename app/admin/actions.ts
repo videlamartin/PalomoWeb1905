@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 import type { OrderStatus, ProductCategory } from '@/types'
 
 // --- ÓRDENES ---
@@ -118,3 +119,12 @@ export async function upsertProduct(data: ProductData) {
   revalidatePath('/admin/productos')
   revalidatePath('/admin/dashboard')
 }
+
+// --- SESIÓN ---
+
+export async function logout() {
+  const supabase = createClient()
+  await supabase.auth.signOut()
+  redirect('/admin/login')
+}
+

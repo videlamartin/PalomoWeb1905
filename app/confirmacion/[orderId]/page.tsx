@@ -80,7 +80,7 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
               <div key={item.id} className="flex justify-between items-start">
                 <div>
                   <p className="font-condensed text-sm text-white uppercase tracking-wide">{item.product_name}</p>
-                  <p className="font-condensed text-xs text-gray-muted uppercase">Talle {item.size} × {item.quantity}</p>
+                  <p className="font-condensed text-xs text-gray-muted uppercase">{item.size === 'U' ? 'Talle Único' : `Talle ${item.size}`} × {item.quantity}</p>
                 </div>
                 <p className="font-display text-lg text-white">{formatPrice(item.unit_price * item.quantity)}</p>
               </div>

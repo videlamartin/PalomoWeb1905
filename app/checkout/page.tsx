@@ -25,6 +25,19 @@ export default function CheckoutPage() {
     resolver: zodResolver(checkoutSchema),
   })
 
+  const errorCount = Object.keys(errors).length
+
+  const scrollToFirstError = () => {
+    const firstErrorKey = Object.keys(errors)[0]
+    if (firstErrorKey) {
+      const el = document.getElementById(firstErrorKey)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        el.focus()
+      }
+    }
+  }
+
   const onSubmit = async (data: CheckoutSchema) => {
     if (items.length === 0) return
     setIsLoading(true)
@@ -231,7 +244,19 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Error */}
+            {/* Validation errors summary */}
+            {errorCount > 0 && (
+              <div className="p-4 border border-red-500/30 bg-red-500/10 cursor-pointer" onClick={scrollToFirstError}>
+                <p className="font-condensed text-sm text-red-400 flex items-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                  </svg>
+                  Hay {errorCount} {errorCount === 1 ? 'campo obligatorio sin completar' : 'campos obligatorios sin completar'}. Tocá aquí para ir al primero.
+                </p>
+              </div>
+            )}
+
+            {/* Server error */}
             {submitError && (
               <div className="p-4 border border-red-500/30 bg-red-500/10">
                 <p className="font-condensed text-sm text-red-400">{submitError}</p>
@@ -283,7 +308,7 @@ export default function CheckoutPage() {
                         {item.product_name}
                       </p>
                       <p className="font-condensed text-xs text-gray-muted uppercase mt-0.5">
-                        {item.size} × {item.quantity}
+                        {item.size === 'U' ? 'Talle Único' : item.size} × {item.quantity}
                       </p>
                       <p className="font-display text-base text-white mt-1">
                         {formatPrice(item.unit_price * item.quantity)}
