@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { updateOrderStatus } from '../../actions'
 import { formatPrice, getCustomerWhatsAppUrl } from '@/lib/utils'
 import { ORDER_STATUS_COLORS, ORDER_STATUS_LABELS } from '@/types'
 import type { Order, OrderStatus, OrderItem } from '@/types'
@@ -11,7 +11,7 @@ interface OrdenesClientProps {
 }
 
 export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
-  const [allOrders] = useState<Order[]>(initialOrders)
+  const allOrders = initialOrders
   const [filterStatus, setFilterStatus] = useState<OrderStatus | undefined>()
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null)
   const [orderDetail, setOrderDetail] = useState<Order | null>(null)
@@ -32,10 +32,13 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
   const updateStatus = async (orderId: string, status: OrderStatus) => {
     setIsUpdating(true)
     try {
-      const supabase = createClient()
-      await supabase.from('orders').update({ status }).eq('id', orderId)
-      // Actualizar el detalle en memoria
+      await updateOrderStatus(orderId, status)
+      // La prop initialOrders se actualizará sola gracias a revalidatePath,
+      // solo actualizamos el detalle que tenemos abierto en memoria
       setOrderDetail((prev) => prev ? { ...prev, status } : prev)
+    } catch (err) {
+      console.error(err)
+      alert('Error al actualizar el estado')
     } finally {
       setIsUpdating(false)
     }

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { createClient } from '@/lib/supabase/client'
+import { deleteProduct, upsertProduct } from '../../actions'
 import { formatPrice } from '@/lib/utils'
 import { CATEGORY_LABELS } from '@/types'
 import type { Product, ProductCategory } from '@/types'
@@ -12,39 +11,24 @@ interface ProductosClientProps {
 }
 
 export function ProductosClient({ initialProducts }: ProductosClientProps) {
-  const queryClient = useQueryClient()
-  const [products, setProducts] = useState<Product[]>(initialProducts)
+  const products = initialProducts
   const [showModal, setShowModal] = useState(false)
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  const [isRefreshing, setIsRefreshing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
-  // Refrescar lista desde el cliente (tras crear/editar/borrar)
-  const refreshProducts = async () => {
-    setIsRefreshing(true)
+  const handleDelete = async (id: string) => {
+    setIsDeleting(true)
     try {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('products')
-        .select('*, product_sizes(*)')
-        .order('created_at', { ascending: false })
-      setProducts((data as Product[]) ?? [])
+      await deleteProduct(id)
+      setDeleteConfirm(null)
+    } catch (err) {
+      console.error(err)
+      alert('Error al eliminar el producto')
     } finally {
-      setIsRefreshing(false)
+      setIsDeleting(false)
     }
   }
-
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const supabase = createClient()
-      const { error } = await supabase.from('products').delete().eq('id', id)
-      if (error) throw error
-    },
-    onSuccess: () => {
-      setDeleteConfirm(null)
-      refreshProducts()
-    },
-  })
 
   const totalStock = (product: Product) =>
     (product.product_sizes ?? []).reduce((s, ps) => s + ps.stock, 0)
@@ -69,15 +53,7 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
 
       {/* ── MOBILE: Cards ── */}
       <div className="lg:hidden space-y-3">
-        {isRefreshing ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="admin-card space-y-3">
-              <div className="h-4 shimmer-bg w-3/4" />
-              <div className="h-4 shimmer-bg w-1/2" />
-              <div className="h-4 shimmer-bg w-1/3" />
-            </div>
-          ))
-        ) : products.length === 0 ? (
+        {products.length === 0 ? (
           <div className="admin-card py-10 text-center font-condensed text-xs text-gray-muted uppercase">
             No hay productos. Creá el primero.
           </div>
@@ -112,9 +88,9 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
                 {deleteConfirm === product.id ? (
                   <div className="flex gap-1 flex-1">
                     <button
-                      onClick={() => deleteMutation.mutate(product.id)}
+                      onClick={() => handleDelete(product.id)}
                       className="btn-danger text-[10px] px-2 py-1 flex-1"
-                      disabled={deleteMutation.isPending}
+                      disabled={isDeleting}
                     >
                       Confirmar
                     </button>
@@ -152,17 +128,7 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
             </tr>
           </thead>
           <tbody>
-            {isRefreshing ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i} className="border-b border-white/5">
-                  {Array.from({ length: 6 }).map((_, j) => (
-                    <td key={j} className="py-4 pr-4">
-                      <div className="h-4 shimmer-bg w-full" />
-                    </td>
-                  ))}
-                </tr>
-              ))
-            ) : products.length === 0 ? (
+            {products.length === 0 ? (
               <tr>
                 <td colSpan={6} className="py-12 text-center font-condensed text-xs text-gray-muted uppercase">
                   No hay productos. Creá el primero.
@@ -201,9 +167,9 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
                       {deleteConfirm === product.id ? (
                         <div className="flex gap-1">
                           <button
-                            onClick={() => deleteMutation.mutate(product.id)}
+                            onClick={() => handleDelete(product.id)}
                             className="btn-danger text-[10px] px-2 py-1"
-                            disabled={deleteMutation.isPending}
+                            disabled={isDeleting}
                           >
                             Confirmar
                           </button>
@@ -236,10 +202,7 @@ export function ProductosClient({ initialProducts }: ProductosClientProps) {
         <ProductModal
           product={editProduct}
           onClose={() => setShowModal(false)}
-          onSuccess={() => {
-            setShowModal(false)
-            refreshProducts()
-          }}
+          onSuccess={() => setShowModal(false)}
         />
       )}
     </div>
@@ -271,8 +234,8 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
     setError(null)
 
     try {
-      const supabase = createClient()
       const data = {
+        id: product?.id,
         name: form.name,
         description: form.description || null,
         price: parseFloat(form.price),
@@ -281,14 +244,7 @@ function ProductModal({ product, onClose, onSuccess }: ProductModalProps) {
         images: form.images.split('\n').map((l) => l.trim()).filter(Boolean),
       }
 
-      if (product) {
-        const { error } = await supabase.from('products').update(data).eq('id', product.id)
-        if (error) throw error
-      } else {
-        const { error } = await supabase.from('products').insert(data)
-        if (error) throw error
-      }
-
+      await upsertProduct(data)
       onSuccess()
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error al guardar')
