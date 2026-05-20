@@ -5,6 +5,7 @@ import { Providers } from './providers'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { CartDrawer } from '@/components/cart/CartDrawer'
+import { Analytics } from '@vercel/analytics/next'
 
 const bebasNeue = Bebas_Neue({
   weight: '400',
@@ -73,6 +74,7 @@ export default function RootLayout({
           </main>
           <Footer />
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
