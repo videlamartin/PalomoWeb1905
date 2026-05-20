@@ -10,10 +10,6 @@ import { checkoutSchema, type CheckoutSchema } from '@/lib/validations'
 import { formatPrice } from '@/lib/utils'
 import { PROVINCES } from '@/types'
 
-export const metadata = {
-  title: 'Checkout',
-}
-
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, getTotal, clearCart } = useCartStore()

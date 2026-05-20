@@ -28,7 +28,7 @@ export function SizeSelector({ sizes, selectedSize, onSelect }: SizeSelectorProp
         {SIZE_ORDER.filter((size) => sizeMap.has(size)).map((size) => {
           const stock = sizeMap.get(size) ?? 0
           const outOfStock = stock === 0
-          const stockInfo = getStockLabelUtil(stock)
+          const stockInfo = getStockLabel(stock)
           const isSelected = selectedSize === size
 
           return (
@@ -61,7 +61,7 @@ export function SizeSelector({ sizes, selectedSize, onSelect }: SizeSelectorProp
 
       {selectedSize && (() => {
         const stock = sizeMap.get(selectedSize) ?? 0
-        const stockInfo = getStockLabelUtil(stock)
+        const stockInfo = getStockLabel(stock)
         if (stockInfo && stock > 0) {
           return (
             <p className={`mt-2 font-condensed text-xs uppercase tracking-wider ${stockInfo.color}`}>
