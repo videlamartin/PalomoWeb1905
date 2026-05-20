@@ -79,6 +79,12 @@ export function OrdenesClient({ initialOrders }: OrdenesClientProps) {
       await deleteOrder(orderId)
       setSelectedOrderId(null)
       setOrderDetail(null)
+      const params = new URLSearchParams(searchParams.toString())
+      if (params.has('view')) {
+        params.delete('view')
+        const query = params.toString()
+        router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false })
+      }
     } catch (err) {
       console.error(err)
       alert('Error al eliminar la orden')
